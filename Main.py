@@ -19,8 +19,14 @@ def show_images(images):
         plt.xticks([])
         plt.yticks([])
         plt.grid(False)
-        plt.imshow(images[i], cmap=plt.cm.binary)
+        plt.imshow(images[i], cmap='gray')
     plt.show()
 
 show_images(train_images)
 
+
+batch_size = 32
+#Shuffle Dataset
+dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(1000)
+#Split into minibatches, prefetches 1 minibatch
+dataset = dataset.batch(batch_size=batch_size, drop_remainder=True).prefetch(1)
