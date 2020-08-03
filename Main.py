@@ -50,7 +50,7 @@ generator = tf.keras.models.Sequential([
 
 noise = tf.random.normal(shape=[1, num_features])
 generated_images = generator(noise, training=False)
-plot_image(generated_images)
+#plot_image(generated_images)
 
 discriminator = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(64, (5, 5), (2, 2), padding='same', input_shape=[28, 28, 1]),
@@ -65,3 +65,8 @@ discriminator = tf.keras.models.Sequential([
 
 decision = discriminator(generated_images)
 print(decision)
+
+discriminator.compile(loss='binary_crossentropy', optimizer='rmsprop')
+discriminator.trainable = False
+gan = tf.keras.models.Sequential([generator, discriminator])
+gan.compile(loss='binary_crossentropy', optimizer='rmsprop')
