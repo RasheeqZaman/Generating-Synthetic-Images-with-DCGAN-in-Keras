@@ -82,7 +82,7 @@ def train_dcgan(gan, dataset, batch_size, num_features, epochs=5):
         for X_batch in dataset:
             noise = tf.random.normal(shape=[batch_size, num_features])
             generated_images = generator(noise)
-            X_fake_and_real = tf.concat([generated_images, X_batch], axis=0)
+            X_fake_and_real = tf.concat([generated_images, X_batch], 0)
             y1 = tf.constant([[0.]]*batch_size + [[1.]]*batch_size)
             discriminator.trainable = True
             discriminator.train_on_batch(X_fake_and_real, y1)
@@ -95,3 +95,10 @@ def train_dcgan(gan, dataset, batch_size, num_features, epochs=5):
 def generate_and_save_images(model, epoch, test_input):
     predictions = model(test_input, training=False)
     show_images(predictions)
+
+x_train_dcgan = train_images.reshape(-1, 28, 28, 1) * 2. -1
+batch_size = 32
+dataset = tf.data.Dataset.from_tensor_slices(x_train_dcgan).shuffle(1000)
+dataset = dataset.batch(batch_size, drop_remainder=True).prefetch(1)
+
+train_dcgan(gan, dataset, batch_size, num_features, epochs=10)
