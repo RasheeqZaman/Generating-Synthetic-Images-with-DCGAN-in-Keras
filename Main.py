@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 print('Tensorflow Version: ', tf.__version__)
 
 #Loading Images
@@ -22,7 +23,7 @@ def show_images(images):
         plt.imshow(images[i], cmap='gray')
     plt.show()
 
-show_images(train_images)
+#show_images(train_images)
 
 
 batch_size = 32
@@ -30,3 +31,23 @@ batch_size = 32
 dataset = tf.data.Dataset.from_tensor_slices(train_images).shuffle(1000)
 #Split into minibatches, prefetches 1 minibatch
 dataset = dataset.batch(batch_size=batch_size, drop_remainder=True).prefetch(1)
+
+def plot_image(gen_image):
+    img = np.array(gen_image)
+    img = (img[0, :, :, :] + 1.) / 2.
+    img = Image.fromarray(img, 'RGB')
+    img.show()
+
+num_features = 100
+generator = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(7*7*128, input_shape=[num_features]),
+    tf.keras.layers.Reshape([7, 7, 128]),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2DTranspose(64, (5, 5), (2, 2), padding='same', activation='selu'),
+    tf.keras.layers.BatchNormalization(),
+    tf.keras.layers.Conv2DTranspose(1, (5, 5), (2, 2), padding='same', activation='tanh')
+])
+
+noise = tf.random.normal(shape=[1, num_features])
+generated_images = generator(noise, training=False)
+plot_image(generated_images)
