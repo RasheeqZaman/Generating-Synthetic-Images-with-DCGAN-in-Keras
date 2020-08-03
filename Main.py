@@ -3,6 +3,7 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+from tqdm import tqdm
 print('Tensorflow Version: ', tf.__version__)
 
 #Loading Images
@@ -70,3 +71,27 @@ discriminator.compile(loss='binary_crossentropy', optimizer='rmsprop')
 discriminator.trainable = False
 gan = tf.keras.models.Sequential([generator, discriminator])
 gan.compile(loss='binary_crossentropy', optimizer='rmsprop')
+
+
+seed = tf.random.normal(shape=[batch_size, num_features])
+
+def train_dcgan(gan, dataset, batch_size, num_features, epochs=5):
+    generator, discriminator = gan.layers
+    for epoch in tqdm(range(epochs)):
+        print("Epoch: {}/{}".format(epoch+1, epochs))
+        for X_batch in dataset:
+            noise = tf.random.normal(shape=[batch_size, num_features])
+            generated_images = generator(noise)
+            X_fake_and_real = tf.concat([generated_images, X_batch], axis=0)
+            y1 = tf.constant([[0.]]*batch_size + [[1.]]*batch_size)
+            discriminator.trainable = True
+            discriminator.train_on_batch(X_fake_and_real, y1)
+            y2 = tf.constant([[1.]]*batch_size)
+            discriminator.trainable = False
+            gan.train_on_batch(noise, y2)
+        generate_and_save_images(generator, epoch+1, seed)
+    generate_and_save_images(generator, epochs, seed)
+
+def generate_and_save_images(model, epoch, test_input):
+    predictions = model(test_input, training=False)
+    show_images(predictions)
