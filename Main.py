@@ -51,3 +51,17 @@ generator = tf.keras.models.Sequential([
 noise = tf.random.normal(shape=[1, num_features])
 generated_images = generator(noise, training=False)
 plot_image(generated_images)
+
+discriminator = tf.keras.models.Sequential([
+    tf.keras.layers.Conv2D(64, (5, 5), (2, 2), padding='same', input_shape=[28, 28, 1]),
+    tf.keras.layers.LeakyReLU(0.2),
+    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Conv2D(128, (5, 5), (2, 2), padding='same'),
+    tf.keras.layers.LeakyReLU(0.2),
+    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+decision = discriminator(generated_images)
+print(decision)
